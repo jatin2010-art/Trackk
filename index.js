@@ -56,13 +56,19 @@ const showTodayTasks = async () => {
     let today = new Date().toISOString().slice(0, 10);
 
     const todayTasks = toDos.filter(t => {
-        let date = new Date(t.createdAt);
-        date.toISOString().slice(0, 10) === today;
+        const date = new Date(t.createdAt);
+        if (isNaN(date)) return false;  // Skip if invalid
+
+        // Strip time for both dates
+        const createdDate = new Date(date);
+        createdDate.setHours(0, 0, 0, 0);
+
+        return createdDate.getTime() === today.getTime();
     });
+
+
     if (todayTasks.length === 0) {
         console.log("No tasks today. Enjoy!");
-        console.log(today);
-        console.log(todayTasks);
         await inquirer.prompt([{
             type: "input",
             name: "continue",
@@ -106,30 +112,30 @@ const showCompletedTaskDetails = async (idx) => {
     }
 }
 
-// const showCompletedTask = async () => {
-//     if (completedTasks.length === 0) {
-//         console.log("No task completed yet");
-//     } else {
-//         console.log("Tasks completed :- ");
-//         const taskChoice = completedTasks.map((item, idx) => ({
-//             name: `[${idx + 1}] ${item.task}`,
-//             value: idx,
-//         }));
-//         taskChoice.push({ name: "GO BACK", value: -1 });
+const showCompletedTask = async () => {
+    if (completedTasks.length === 0) {
+        console.log("No task completed yet");
+    } else {
+        console.log("Tasks completed :- ");
+        const taskChoice = completedTasks.map((item, idx) => ({
+            name: `[${idx + 1}] ${item.task}`,
+            value: idx,
+        }));
+        taskChoice.push({ name: "GO BACK", value: -1 });
 
-//         const selected = await inquirer.prompt([{
-//             type: 'list',
-//             name: "selected",
-//             message: "YOURS TODAY's TASKS",
-//             choices: taskChoice,
-//         }]);
+        const selected = await inquirer.prompt([{
+            type: 'list',
+            name: "selected",
+            message: "YOURS TODAY's TASKS",
+            choices: taskChoice,
+        }]);
 
-//         if (selected.selected === -1)
-//             return;
-//         await showCompletedTaskDetails(selected.selected);
+        if (selected.selected === -1)
+            return;
+        await showCompletedTaskDetails(selected.selected);
 
-//     }
-// }
+    }
+}
 
 const showTask = async () => {
     if (toDos.length === 0) {
