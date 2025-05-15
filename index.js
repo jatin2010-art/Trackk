@@ -14,7 +14,7 @@ const addTask = async () => {
     toDos.push({ task: response.task, done: false, createdAt: new Date().toLocaleString() });
     console.log(`Task added : ${response.task}`);
 
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 800));
     console.clear();
 }
 
@@ -33,7 +33,7 @@ const showTaskDetails = async (idx) => {
             "3. Edit",
             "4. go back",
         ]
-    }])
+    }]);
     if (action === "1. Complete this task") {
         const compTask = { ...task, done: true, completedAt: new Date().toLocaleString() };
         completedTasks.push(compTask);
@@ -55,17 +55,81 @@ const showTaskDetails = async (idx) => {
 const showTodayTasks = async () => {
     let today = new Date().toISOString().slice(0, 10);
 
-    const todayTasks = toDos.filter(t =>
-        t.createdAt.startsWith(today)
-    );
+    const todayTasks = toDos.filter(t => {
+        let date = new Date(t.createdAt);
+        date.toISOString().slice(0, 10) === today;
+    });
     if (todayTasks.length === 0) {
-        return console.log("No tasks today. Enjoy!");
+        console.log("No tasks today. Enjoy!");
+        console.log(today);
+        console.log(todayTasks);
+        await inquirer.prompt([{
+            type: "input",
+            name: "continue",
+            message: "Press enter to go back..."
+        }]);
     } else {
+        console.log("Yours Today's ToDo's");
         todayTasks.forEach((t, i) => {
             console.log(`${i + 1}. ${t.task}`);
-        })
+        });
+        await inquirer.prompt([{
+            type: "input",
+            name: "continue",
+            message: "Press enter to go back..."
+        }]);
     }
 }
+
+const showCompletedTaskDetails = async (idx) => {
+    let selectedTask = completedTasks[idx];
+
+    console.log(`Task details:- \ntask: ${selectedTask.task}\ncreated at: ${selectedTask.createdAt}\n completed at: ${selectedTask.completedAt}`);
+
+    const { action } = await inquirer.prompt([{
+        type: "list",
+        name: "asction",
+        message: "-->",
+        choices: [
+            "1. Mark as incomplete",
+            "2. Delete this task",
+            "3. Go back",
+        ]
+    }]);
+
+    if (action === "1. Mark as incomplete") {
+        console.log("in process");
+    } else if (action === "2. Delete this task") {
+        console.log("in process");
+    } else if (action === "3. Go back") {
+        return;
+    }
+}
+
+// const showCompletedTask = async () => {
+//     if (completedTasks.length === 0) {
+//         console.log("No task completed yet");
+//     } else {
+//         console.log("Tasks completed :- ");
+//         const taskChoice = completedTasks.map((item, idx) => ({
+//             name: `[${idx + 1}] ${item.task}`,
+//             value: idx,
+//         }));
+//         taskChoice.push({ name: "GO BACK", value: -1 });
+
+//         const selected = await inquirer.prompt([{
+//             type: 'list',
+//             name: "selected",
+//             message: "YOURS TODAY's TASKS",
+//             choices: taskChoice,
+//         }]);
+
+//         if (selected.selected === -1)
+//             return;
+//         await showCompletedTaskDetails(selected.selected);
+
+//     }
+// }
 
 const showTask = async () => {
     if (toDos.length === 0) {
@@ -91,16 +155,6 @@ const showTask = async () => {
     await showTaskDetails(selected.selected);
 }
 
-const showCompletedTask = async () => {
-    if (completedTasks.length === 0) {
-        console.log("No task completed yet");
-    } else {
-        completedTasks.forEach((element, idx) => {
-            console.log(`${idx + 1}. ${element.task} , completed on  ${element.completedAt}`);
-        });
-    }
-}
-
 const menu = async () => {
     let exit = false;
     while (!exit) {
@@ -121,10 +175,11 @@ const menu = async () => {
             await addTask();
         else if (response.choice === "2. View all tasks")
             await showTask();
-        else if (response.choice === "3. View completed tasks")
+        else if (response.choice === "3. View completed tasks") {
             await showCompletedTask();
-        else if (response.choice === "4. View todays's tasks only")
+        } else if (response.choice === "4. View todays's tasks only") {
             await showTodayTasks();
+        }
         else if (response.choice === "5. Exit") {
             exit = true;
             console.log("\nBye bye !! ");
