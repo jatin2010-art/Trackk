@@ -11,15 +11,17 @@ const addTask = async () => {
         name: "task",
         message: "Enter task :- "
     }]);
-
-    toDos.push({ task: response.task, done: false });
+    toDos.push({ task: response.task, done: false, createdAt: new Date().toLocaleString() });
     console.log(`Task added : ${response.task}`);
+
+    await new Promise(r => setTimeout(r, 1000));
+    console.clear();
 }
 
 const showTaskDetails = async (idx) => {
     const task = toDos[idx];
 
-    console.log(`TASK DETAILS \nTASK : ${task.task}`);
+    console.log(`TASK DETAILS:- \nTASK : ${task.task}\nCREATED AT : ${task.createdAt}\n`);
 
     const { action } = await inquirer.prompt([{
         type: "list",
@@ -33,7 +35,7 @@ const showTaskDetails = async (idx) => {
         ]
     }])
     if (action === "1. Complete this task") {
-        const compTask = { ...task, done: true };
+        const compTask = { ...task, done: true, completedAt: new Date().toLocaleString() };
         completedTasks.push(compTask);
         toDos.splice(idx, 1);
         console.log("Task completed !! congrats");
@@ -46,6 +48,21 @@ const showTaskDetails = async (idx) => {
         return
     } else
         return
+    await new Promise(r => setTimeout(r, 1000));
+    console.clear();
+}
+
+const showTodayTasks = async () => {
+    let today = new Date().toISOString().slice(0,10);
+
+    const todayTasks = toDos.filter(t=>
+        t.createdAt.startsWith(today)
+    );
+    if(todayTasks.length===0){
+        return console.log("No tasks today. Enjoy!");
+    }else{
+
+    }
 }
 
 const showTask = async () => {
@@ -73,32 +90,40 @@ const showTask = async () => {
 }
 
 const showCompletedTask = async () => {
-    completedTasks.forEach((element, idx) => {
-        console.log(`${idx + 1}. ${element.task}`);
-    });
+    if (completedTasks.length === 0) {
+        console.log("No task completed yet");
+    } else {
+        completedTasks.forEach((element, idx) => {
+            console.log(`${idx + 1}. ${element.task} , completed on  ${element.completedAt}`);
+        });
+    }
 }
 
 const menu = async () => {
     let exit = false;
     while (!exit) {
+        console.clear();
         const response = await inquirer.prompt([{
             type: "list",
             name: "choice",
             message: "\n\t----- WELCOME TO THE APP ----- \t\n",
             choices: [
                 "1. Add task",
-                "2. View tasks",
+                "2. View all tasks",
                 "3. View completed tasks",
-                "4.exit"
+                "4. View todays's tasks only",
+                "5.exit"
             ]
         }]);
         if (response.choice === "1. Add task")
             await addTask();
-        else if (response.choice === "2. View tasks")
+        else if (response.choice === "2. View all tasks")
             await showTask();
         else if (response.choice === "3. View completed tasks")
             await showCompletedTask();
-        else if (response.choice === "4.exit") {
+        else if (response.choice === "4. View todays's tasks only")
+            console.log("NOT AVAILABLE YET")
+        else if (response.choice === "5.exit") {
             exit = true;
             console.log("\nBye bye !! ");
         }
