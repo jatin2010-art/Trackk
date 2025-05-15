@@ -53,15 +53,17 @@ const showTaskDetails = async (idx) => {
 }
 
 const showTodayTasks = async () => {
-    let today = new Date().toISOString().slice(0,10);
+    let today = new Date().toISOString().slice(0, 10);
 
-    const todayTasks = toDos.filter(t=>
+    const todayTasks = toDos.filter(t =>
         t.createdAt.startsWith(today)
     );
-    if(todayTasks.length===0){
+    if (todayTasks.length === 0) {
         return console.log("No tasks today. Enjoy!");
-    }else{
-
+    } else {
+        todayTasks.forEach((t, i) => {
+            console.log(`${i + 1}. ${t.task}`);
+        })
     }
 }
 
@@ -112,7 +114,7 @@ const menu = async () => {
                 "2. View all tasks",
                 "3. View completed tasks",
                 "4. View todays's tasks only",
-                "5.exit"
+                "5. Exit"
             ]
         }]);
         if (response.choice === "1. Add task")
@@ -122,8 +124,8 @@ const menu = async () => {
         else if (response.choice === "3. View completed tasks")
             await showCompletedTask();
         else if (response.choice === "4. View todays's tasks only")
-            console.log("NOT AVAILABLE YET")
-        else if (response.choice === "5.exit") {
+            await showTodayTasks();
+        else if (response.choice === "5. Exit") {
             exit = true;
             console.log("\nBye bye !! ");
         }
