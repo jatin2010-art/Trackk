@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import inquirer from 'inquirer';
+import chalk from 'chalk';
 
 const toDos = [];
 const completedTasks = [];
@@ -95,7 +96,7 @@ const showCompletedTaskDetails = async (idx) => {
 
     const { action } = await inquirer.prompt([{
         type: "list",
-        name: "asction",
+        name: "action",
         message: "-->",
         choices: [
             "1. Mark as incomplete",
@@ -105,9 +106,15 @@ const showCompletedTaskDetails = async (idx) => {
     }]);
 
     if (action === "1. Mark as incomplete") {
-        console.log("in process");
+        let completedAt = "";
+        let completedLocalDate = "";
+        const compTask = { ...selectedTask, done: false , completedAt, completedLocalDate };
+        toDos.push(compTask);
+        completedTasks.splice(idx, 1);
+        console.log("Task marked as incomplete");
     } else if (action === "2. Delete this task") {
-        console.log("in process");
+        completedTasks.splice(idx, 1);
+        console.log("deleted successfully");
     } else if (action === "3. Go back") {
         return;
     }
