@@ -5,23 +5,28 @@ import inquirer from 'inquirer';
 const toDos = [];
 const completedTasks = [];
 
+// To add a new task
 const addTask = async () => {
     const response = await inquirer.prompt([{
         type: "input",
         name: "task",
         message: "Enter task :- "
     }]);
-    toDos.push({ task: response.task, done: false, createdAt: new Date().toLocaleString() });
+    let createdAt= new Date().toISOString()
+    let localDate= new Date(createdAt).toLocaleString() 
+    toDos.push({ task: response.task, done: false, createdAt,localDate });
     console.log(`Task added : ${response.task}`);
 
     await new Promise(r => setTimeout(r, 800));
     console.clear();
 }
 
+
+// To show specific task details
 const showTaskDetails = async (idx) => {
     const task = toDos[idx];
 
-    console.log(`TASK DETAILS:- \nTASK : ${task.task}\nCREATED AT : ${task.createdAt}\n`);
+    console.log(`TASK DETAILS:- \nTASK : ${task.task}\nCREATED AT : ${task.localDate}\n`);
 
     const { action } = await inquirer.prompt([{
         type: "list",
@@ -35,7 +40,9 @@ const showTaskDetails = async (idx) => {
         ]
     }]);
     if (action === "1. Complete this task") {
-        const compTask = { ...task, done: true, completedAt: new Date().toLocaleString() };
+        let completedAt = new Date().toISOString()
+        let completedLocalDate = new Date(completedAt).toLocaleString()
+        const compTask = { ...task, done: true, completedAt, completedLocalDate };
         completedTasks.push(compTask);
         toDos.splice(idx, 1);
         console.log("Task completed !! congrats");
@@ -52,20 +59,13 @@ const showTaskDetails = async (idx) => {
     console.clear();
 }
 
+//  To shwo today's tasks details 
 const showTodayTasks = async () => {
     let today = new Date().toISOString().slice(0, 10);
 
-    const todayTasks = toDos.filter(t => {
-        const date = new Date(t.createdAt);
-        if (isNaN(date)) return false;  // Skip if invalid
-
-        // Strip time for both dates
-        const createdDate = new Date(date);
-        createdDate.setHours(0, 0, 0, 0);
-
-        return createdDate.getTime() === today.getTime();
-    });
-
+    const todayTasks = toDos.filter(t =>
+        t.createdAt.startsWith(today)
+    );
 
     if (todayTasks.length === 0) {
         console.log("No tasks today. Enjoy!");
@@ -87,10 +87,11 @@ const showTodayTasks = async () => {
     }
 }
 
+// to show completed tasks details only
 const showCompletedTaskDetails = async (idx) => {
     let selectedTask = completedTasks[idx];
 
-    console.log(`Task details:- \ntask: ${selectedTask.task}\ncreated at: ${selectedTask.createdAt}\n completed at: ${selectedTask.completedAt}`);
+    console.log(`Task details:- \ntask: ${selectedTask.task}\ncreated at: ${selectedTask.createdAt}\n completed at: ${selectedTask.completedLocalDate}`);
 
     const { action } = await inquirer.prompt([{
         type: "list",
@@ -112,11 +113,16 @@ const showCompletedTaskDetails = async (idx) => {
     }
 }
 
+// To show all completed tasks
 const showCompletedTask = async () => {
     if (completedTasks.length === 0) {
-        console.log("No task completed yet");
+        console.log("No tasks completed yet");
+        await inquirer.prompt([{
+            type: "input",
+            name: "continue",
+            message: "Press enter to go back..."
+        }]);
     } else {
-        console.log("Tasks completed :- ");
         const taskChoice = completedTasks.map((item, idx) => ({
             name: `[${idx + 1}] ${item.task}`,
             value: idx,
@@ -126,7 +132,7 @@ const showCompletedTask = async () => {
         const selected = await inquirer.prompt([{
             type: 'list',
             name: "selected",
-            message: "YOURS TODAY's TASKS",
+            message:"Tasks completed :- ",
             choices: taskChoice,
         }]);
 
@@ -136,11 +142,15 @@ const showCompletedTask = async () => {
 
     }
 }
-
+// To view all tasks
 const showTask = async () => {
     if (toDos.length === 0) {
         console.log("No tasks to show");
-        return;
+        await inquirer.prompt([{
+            type: "input",
+            name: "continue",
+            message: "Press enter to go back..."
+        }]);
     }
     const taskChoice = toDos.map((item, idx) => ({
         name: `[${idx + 1}] ${item.task}`,
@@ -161,6 +171,7 @@ const showTask = async () => {
     await showTaskDetails(selected.selected);
 }
 
+// Main menu
 const menu = async () => {
     let exit = false;
     while (!exit) {
