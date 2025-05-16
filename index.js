@@ -2,6 +2,7 @@
 
 import inquirer from 'inquirer';
 import chalk from 'chalk';
+import {log} from './log.js'
 
 const toDos = [];
 const completedTasks = [];
@@ -16,7 +17,7 @@ const addTask = async () => {
     let createdAt= new Date().toISOString()
     let localDate= new Date(createdAt).toLocaleString() 
     toDos.push({ task: response.task, done: false, createdAt,localDate });
-    console.log(`Task added : ${response.task}`);
+    log.success(`Task added : ${response.task}`);
 
     await new Promise(r => setTimeout(r, 800));
     console.clear();
@@ -46,10 +47,10 @@ const showTaskDetails = async (idx) => {
         const compTask = { ...task, done: true, completedAt, completedLocalDate };
         completedTasks.push(compTask);
         toDos.splice(idx, 1);
-        console.log("Task completed !! congrats");
+        log.success("Task completed !! congrats");
     } else if (action === "2. Delete this task") {
         toDos.splice(idx, 1);
-        console.log("task deleted successfully");
+        log.success("task deleted successfully");
     } else if (action === "3. Edit") {
         console.log("CURRENTLY NOT AVAILABLE...");
     } else if (action === "4. go back") {
@@ -111,10 +112,10 @@ const showCompletedTaskDetails = async (idx) => {
         const compTask = { ...selectedTask, done: false , completedAt, completedLocalDate };
         toDos.push(compTask);
         completedTasks.splice(idx, 1);
-        console.log("Task marked as incomplete");
+        log.success("Task marked as incomplete");
     } else if (action === "2. Delete this task") {
         completedTasks.splice(idx, 1);
-        console.log("deleted successfully");
+        log.success("deleted successfully");
     } else if (action === "3. Go back") {
         return;
     }
