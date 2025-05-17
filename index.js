@@ -2,7 +2,7 @@
 
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import {log} from './log.js'
+import { log } from './log.js'
 
 const toDos = [];
 const completedTasks = [];
@@ -14,9 +14,15 @@ const addTask = async () => {
         name: "task",
         message: "Enter task :- "
     }]);
-    let createdAt= new Date().toISOString()
-    let localDate= new Date(createdAt).toLocaleString() 
-    toDos.push({ task: response.task, done: false, createdAt,localDate });
+    if (response.task.trim() === "") {
+        log.error("empty task not added");
+        await new Promise(r => setTimeout(r, 500));
+        console.clear();
+        return;
+    }
+    let createdAt = new Date().toISOString()
+    let localDate = new Date(createdAt).toLocaleString()
+    toDos.push({ task: response.task, done: false, createdAt, localDate });
     log.success(`Task added : ${response.task}`);
 
     await new Promise(r => setTimeout(r, 800));
@@ -28,17 +34,18 @@ const addTask = async () => {
 const showTaskDetails = async (idx) => {
     const task = toDos[idx];
 
-    console.log(`TASK DETAILS:- \nTASK : ${task.task}\nCREATED AT : ${task.localDate}\n`);
+    console.log(`${chalk.green.bold("TASK : ")}${chalk.white(task.task)}`);
+    console.log(`\n${chalk.cyan.bold("CREATED AT : ")}${chalk.white(task.localDate)}\n`);
 
     const { action } = await inquirer.prompt([{
         type: "list",
         name: "action",
         message: "--> ",
         choices: [
-            "1. Complete this task",
-            "2. Delete this task",
-            "3. Edit",
-            "4. go back",
+            chalk.green("1. Complete this task"),
+            chalk.red("2. Delete this task"),
+            chalk.cyan("3. Edit"),
+            chalk.gray("4. go back"),
         ]
     }]);
     if (action === "1. Complete this task") {
@@ -109,7 +116,7 @@ const showCompletedTaskDetails = async (idx) => {
     if (action === "1. Mark as incomplete") {
         let completedAt = "";
         let completedLocalDate = "";
-        const compTask = { ...selectedTask, done: false , completedAt, completedLocalDate };
+        const compTask = { ...selectedTask, done: false, completedAt, completedLocalDate };
         toDos.push(compTask);
         completedTasks.splice(idx, 1);
         log.success("Task marked as incomplete");
@@ -140,7 +147,7 @@ const showCompletedTask = async () => {
         const selected = await inquirer.prompt([{
             type: 'list',
             name: "selected",
-            message:"Tasks completed :- ",
+            message: "Tasks completed :- ",
             choices: taskChoice,
         }]);
 
