@@ -29,7 +29,6 @@ Make sure you have **Node.js** installed.
 npm install -g trackk
 ```
 If you're running it locally from source, use:
-```bash
 
 📦 Usage
 
@@ -43,15 +42,15 @@ You'll see an interactive menu:
 ```bash
 ----- WELCOME TO THE APP -----
 
-Add task
+1. Add task
 
-View all tasks
+2. View all tasks
 
-View completed tasks
+3. View completed tasks
 
-View today's tasks only
+4. View today's tasks only
 
-Exit
+5. Exit
 ```
 
 Select an option and get things done! 🧘‍♂️
