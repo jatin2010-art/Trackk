@@ -44,13 +44,13 @@ const showTaskDetails = async (idx) => {
         name: "action",
         message: "--> ",
         choices: [
-            chalk.green("1. Complete this task"),
-            chalk.red("2. Delete this task"),
-            chalk.cyan("3. Edit"),
-            chalk.gray("4. go back"),
+            { name: chalk.green("1. Complete this task"), value: "complete" },
+            { name: chalk.red("2. Delete this task"), value: "delete" },
+            { name: chalk.cyan("3. Edit"), value: "edit" },
+            { name: chalk.gray("4. Go back"), value: "back" },
         ]
     }]);
-    if (action === "1. Complete this task") {
+    if (action ==="complete") {
         let completedAt = new Date().toISOString()
         let completedLocalDate = new Date(completedAt).toLocaleString()
         const compTask = { ...task, done: true, completedAt, completedLocalDate };
@@ -59,13 +59,13 @@ const showTaskDetails = async (idx) => {
         saveTasks(toDos);
         saveCompletedTasks(completedTasks);
         log.success("Task completed !! congrats");
-    } else if (action === "2. Delete this task") {
+    } else if (action ==="delete") {
         toDos.splice(idx, 1);
         saveTasks(toDos);
         log.success("task deleted successfully");
-    } else if (action === "3. Edit") {
+    } else if (action === "edit") {
         console.log("CURRENTLY NOT AVAILABLE...");
-    } else if (action === "4. go back") {
+    } else if (action === "back") {
         return
     } else
         return
