@@ -8,7 +8,16 @@ import { loadTasks, loadCompletedTasks, saveTasks, saveCompletedTasks } from "./
 const toDos = loadTasks();
 const completedTasks = loadCompletedTasks();
 
-// To add a new task
+// Helper functions
+const wait = async () => {
+    await inquirer.prompt([{
+        type: "input",
+        name: "continue",
+        message: "Press enter to go back",
+    }]);
+}
+
+// To add a new task---------------------------------------------------------------------------------
 const addTask = async () => {
     const response = await inquirer.prompt([{
         type: "input",
@@ -27,12 +36,11 @@ const addTask = async () => {
     saveTasks(toDos);
     log.success(`Task added : ${response.task}`);
 
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 500));
     console.clear();
 }
 
-
-// To show specific task details
+// To show specific task details-------------------------------------------------------------------------------
 const showTaskDetails = async (idx) => {
     const task = toDos[idx];
 
@@ -50,7 +58,7 @@ const showTaskDetails = async (idx) => {
             { name: chalk.gray("4. Go back"), value: "back" },
         ]
     }]);
-    if (action ==="complete") {
+    if (action === "complete") {
         let completedAt = new Date().toISOString()
         let completedLocalDate = new Date(completedAt).toLocaleString()
         const compTask = { ...task, done: true, completedAt, completedLocalDate };
@@ -59,12 +67,31 @@ const showTaskDetails = async (idx) => {
         saveTasks(toDos);
         saveCompletedTasks(completedTasks);
         log.success("Task completed !! congrats");
-    } else if (action ==="delete") {
+    } else if (action === "delete") {
         toDos.splice(idx, 1);
         saveTasks(toDos);
         log.success("task deleted successfully");
     } else if (action === "edit") {
-        console.log("CURRENTLY NOT AVAILABLE...");
+
+        const newTask = await inquirer.prompt([{
+            type: "input",
+            name: "task",
+            message: "Edit the task",
+            default: task.task,
+        }])
+        if (newTask.task === "") {
+            log.error("Task empty, not updated");
+        } else if (newTask.task === task.task) {
+            log.error("task same not updated");
+        } else {
+            task.task = newTask.task;
+            saveTasks(toDos);
+            log.success("Updated successfully");
+        }
+
+        await new Promise(r => setTimeout(r, 800));
+        console.clear();
+
     } else if (action === "back") {
         return
     } else
@@ -73,7 +100,7 @@ const showTaskDetails = async (idx) => {
     console.clear();
 }
 
-//  To shwo today's tasks details 
+//  To shwo today's tasks details-------------------------------------------------------------------------- 
 const showTodayTasks = async () => {
     let today = new Date().toISOString().slice(0, 10);
 
@@ -81,27 +108,20 @@ const showTodayTasks = async () => {
         t.createdAt.startsWith(today)
     );
 
-    if (todayTasks.length === 0) {
-        console.log("No tasks today. Enjoy!");
-        await inquirer.prompt([{
-            type: "input",
-            name: "continue",
-            message: "Press enter to go back..."
-        }]);
-    } else {
+    if (todayTasks.length === 0 && toDos.length === 0)
+        console.log("No tasks pending enjoy!!");
+    else if (todayTasks.length === 0)
+        console.log("No tasks Today ,but have pending tasks");
+    else {
         console.log("Yours Today's ToDo's");
         todayTasks.forEach((t, i) => {
             console.log(`${i + 1}. ${t.task}`);
         });
-        await inquirer.prompt([{
-            type: "input",
-            name: "continue",
-            message: "Press enter to go back..."
-        }]);
     }
+    await wait();
 }
 
-// to show completed tasks details only
+// to show completed tasks details only-----------------------------------------------------------------------------------
 const showCompletedTaskDetails = async (idx) => {
     let selectedTask = completedTasks[idx];
 
@@ -136,15 +156,11 @@ const showCompletedTaskDetails = async (idx) => {
     }
 }
 
-// To show all completed tasks
+// To show all completed tasks-------------------------------------------------------------------------------------
 const showCompletedTask = async () => {
     if (completedTasks.length === 0) {
         console.log("No tasks completed yet");
-        await inquirer.prompt([{
-            type: "input",
-            name: "continue",
-            message: "Press enter to go back..."
-        }]);
+        await wait();
     } else {
         const taskChoice = completedTasks.map((item, idx) => ({
             name: `[${idx + 1}] ${item.task}`,
@@ -162,10 +178,9 @@ const showCompletedTask = async () => {
         if (selected.selected === -1)
             return;
         await showCompletedTaskDetails(selected.selected);
-
     }
 }
-// To view all tasks
+// To view all tasks---------------------------------------------------------------------------------------------
 const showTask = async () => {
     if (toDos.length === 0) {
         console.log("No tasks to show");
@@ -194,7 +209,7 @@ const showTask = async () => {
     await showTaskDetails(selected.selected);
 }
 
-// Main menu
+// Main menu----------------------------------------------------------------------------------------------------------
 const menu = async () => {
     let exit = false;
     while (!exit) {
@@ -215,15 +230,12 @@ const menu = async () => {
             await addTask();
         else if (response.choice === "2. View all tasks")
             await showTask();
-        else if (response.choice === "3. View completed tasks") {
+        else if (response.choice === "3. View completed tasks")
             await showCompletedTask();
-        } else if (response.choice === "4. View todays's tasks only") {
+        else if (response.choice === "4. View todays's tasks only")
             await showTodayTasks();
-        }
-        else if (response.choice === "5. Exit") {
+        else if (response.choice === "5. Exit")
             exit = true;
-            console.log("\nBye bye !! ");
-        }
     }
 }
 
