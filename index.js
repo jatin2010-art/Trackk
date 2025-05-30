@@ -23,16 +23,27 @@ const addTask = async () => {
         type: "input",
         name: "task",
         message: "Enter task :- "
-    }]);
+    },
+    {
+        type: "list",
+        name: "priority",
+        message: "Set priority:- ",
+        choices: [
+            { name: "1. High", value: "high" },
+            { name: "2. Moderate", value: "moderate" },
+            { name: "3. Low", value: "low" },
+        ]
+    }
+    ]);
     if (response.task.trim() === "") {
-        log.error("empty task not added");
+        log.error("Empty task, not added");
         await new Promise(r => setTimeout(r, 500));
         console.clear();
         return;
     }
     let createdAt = new Date().toISOString()
     let localDate = new Date(createdAt).toLocaleString()
-    toDos.push({ task: response.task, done: false, createdAt, localDate });
+    toDos.push({ task: response.task, done: false, priority: response.priority, createdAt, localDate });
     saveTasks(toDos);
     log.success(`Task added : ${response.task}`);
 
@@ -45,6 +56,14 @@ const showTaskDetails = async (idx) => {
     const task = toDos[idx];
 
     console.log(`${chalk.green.bold("TASK : ")}${chalk.white(task.task)}`);
+    if (task.priority === "high")
+        console.log(`\n${chalk.red(task.priority)}\n`);
+    else if (task.priority === "moderate")
+        console.log(`\n${chalk.yellow(task.priority)}\n`);
+    else if (task.priority === "low")
+        console.log(`\n${chalk.blue(task.priority)}\n`);
+    else
+        console.log(`\n${chalk.gray(task.priority)}\n`);
     console.log(`\n${chalk.cyan.bold("CREATED AT : ")}${chalk.white(task.localDate)}\n`);
 
     const { action } = await inquirer.prompt([{
@@ -72,11 +91,10 @@ const showTaskDetails = async (idx) => {
         saveTasks(toDos);
         log.success("task deleted successfully");
     } else if (action === "edit") {
-
         const newTask = await inquirer.prompt([{
             type: "input",
             name: "task",
-            message: "Edit the task",
+            message: "Edit the task (press tab or start writing) : ",
             default: task.task,
         }])
         if (newTask.task === "") {
@@ -125,7 +143,7 @@ const showTodayTasks = async () => {
 const showCompletedTaskDetails = async (idx) => {
     let selectedTask = completedTasks[idx];
 
-    console.log(`Task details:- \ntask: ${selectedTask.task}\ncreated at: ${selectedTask.createdAt}\n completed at: ${selectedTask.completedLocalDate}`);
+    console.log(`Task details:- \ntask: ${selectedTask.task}\nPriority: ${selectedTask.priority}\nCreated at: ${selectedTask.createdAt}\n completed at: ${selectedTask.completedLocalDate}`);
 
     const { action } = await inquirer.prompt([{
         type: "list",
