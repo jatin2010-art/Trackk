@@ -33,6 +33,12 @@ const addTask = async () => {
             { name: "2. Moderate", value: "moderate" },
             { name: "3. Low", value: "low" },
         ]
+    },
+    {
+        type: "input",
+        name: "dueDate",
+        message: "Enter due date (Press enter to use today's date): ",
+        default: new Date.toLocaleString()
     }
     ]);
     if (response.task.trim() === "") {
@@ -43,7 +49,7 @@ const addTask = async () => {
     }
     let createdAt = new Date().toISOString()
     let localDate = new Date(createdAt).toLocaleString()
-    toDos.push({ task: response.task, done: false, priority: response.priority, createdAt, localDate });
+    toDos.push({ task: response.task, done: false, priority: response.priority, createdAt, localDate,dueDate: response.dueDate });
     saveTasks(toDos);
     log.success(`Task added : ${response.task}`);
 
@@ -57,14 +63,15 @@ const showTaskDetails = async (idx) => {
 
     console.log(`${chalk.green.bold("TASK : ")}${chalk.white(task.task)}`);
     if (task.priority === "high")
-        console.log(`\n${chalk.red(task.priority)}\n`);
+        console.log(`\n${chalk.red(task.priority)}`);
     else if (task.priority === "moderate")
-        console.log(`\n${chalk.yellow(task.priority)}\n`);
+        console.log(`\n${chalk.yellow(task.priority)}`);
     else if (task.priority === "low")
-        console.log(`\n${chalk.blue(task.priority)}\n`);
+        console.log(`\n${chalk.blue(task.priority)}`);
     else
-        console.log(`\n${chalk.gray(task.priority)}\n`);
+        console.log(`\n${chalk.gray(task.priority)}`);
     console.log(`\n${chalk.cyan.bold("CREATED AT : ")}${chalk.white(task.localDate)}\n`);
+    console.log(`\n${chalk.cyan.bold("DUE DATE : ")}${chalk.white(task.dueDate)}\n`);
 
     const { action } = await inquirer.prompt([{
         type: "list",
@@ -96,7 +103,8 @@ const showTaskDetails = async (idx) => {
             name: "task",
             message: "Edit the task (press tab or start writing) : ",
             default: task.task,
-        }])
+        }
+        ])
         if (newTask.task === "") {
             log.error("Task empty, not updated");
         } else if (newTask.task === task.task) {
