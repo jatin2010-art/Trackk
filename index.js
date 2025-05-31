@@ -38,7 +38,7 @@ const addTask = async () => {
         type: "input",
         name: "dueDate",
         message: "Enter due date (Press enter to use today's date): ",
-        default: new Date.toLocaleString()
+        default: new Date().toLocaleString()
     }
     ]);
     if (response.task.trim() === "") {
@@ -49,7 +49,7 @@ const addTask = async () => {
     }
     let createdAt = new Date().toISOString()
     let localDate = new Date(createdAt).toLocaleString()
-    toDos.push({ task: response.task, done: false, priority: response.priority, createdAt, localDate,dueDate: response.dueDate });
+    toDos.push({ task: response.task, done: false, priority: response.priority, createdAt, localDate, dueDate: response.dueDate });
     saveTasks(toDos);
     log.success(`Task added : ${response.task}`);
 
@@ -103,14 +103,34 @@ const showTaskDetails = async (idx) => {
             name: "task",
             message: "Edit the task (press tab or start writing) : ",
             default: task.task,
+        },
+        {
+            type: "list",
+            name: "priority",
+            message: "Enter priority",
+            choices: [
+                { name: "1. High", value: "high" },
+                { name: "2. Moderate", value: "moderate" },
+                { name: "3. Low", value: "low" },
+            ],
+            default: task.priority,
+        },
+        {
+            type: "input",
+            name: "dueDate",
+            message: "Enter due date (Press enter to use same date): ",
+            default: task.dueDate
         }
         ])
-        if (newTask.task === "") {
-            log.error("Task empty, not updated");
+        let parsedDate = newTask.dueDate.parse();
+        if (newTask.task === "" || newTask.dueDate.trim() === "" || !newTask.dueDate || isNaN(Date.parse(newTask.dueDate))) {
+            log.error("Info not enterd correctly, not updated");
         } else if (newTask.task === task.task) {
             log.error("task same not updated");
         } else {
             task.task = newTask.task;
+            task.dueDate = newTask.dueDate;
+            task.priority = newTask.priority;
             saveTasks(toDos);
             log.success("Updated successfully");
         }
@@ -131,7 +151,7 @@ const showTodayTasks = async () => {
     let today = new Date().toISOString().slice(0, 10);
 
     const todayTasks = toDos.filter(t =>
-        t.createdAt.startsWith(today)
+        t.createdAt.startsWith(today) || t.dueDate.startsWith(today)
     );
 
     if (todayTasks.length === 0 && toDos.length === 0)
