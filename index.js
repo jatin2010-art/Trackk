@@ -36,9 +36,10 @@ const addTask = async () => {
     },
     {
         type: "input",
-        name: "dueDate",
+        name: "dueLocalDate",
         message: "Enter due date (Press enter to use today's date): ",
-        default: new Date().toLocaleString()
+        default: new Date().toLocaleString(),
+        required:true
     }
     ]);
     if (response.task.trim() === "") {
@@ -49,7 +50,14 @@ const addTask = async () => {
     }
     let createdAt = new Date().toISOString()
     let localDate = new Date(createdAt).toLocaleString()
-    toDos.push({ task: response.task, done: false, priority: response.priority, createdAt, localDate, dueDate: response.dueDate });
+    let dueISODate = new Date(response.dueLocalDate).toISOString()
+    toDos.push({task: response.task, 
+                done: false, 
+                priority: response.priority, 
+                createdAt, 
+                localDate, 
+                dueLocalDate: response.dueLocalDate , 
+                dueISODate});
     saveTasks(toDos);
     log.success(`Task added : ${response.task}`);
 
@@ -71,7 +79,7 @@ const showTaskDetails = async (idx) => {
     else
         console.log(`\n${chalk.gray(task.priority)}`);
     console.log(`\n${chalk.cyan.bold("CREATED AT : ")}${chalk.white(task.localDate)}\n`);
-    console.log(`\n${chalk.cyan.bold("DUE DATE : ")}${chalk.white(task.dueDate)}\n`);
+    console.log(`\n${chalk.cyan.bold("DUE DATE : ")}${chalk.white(task.dueLocalDate)}\n`);
 
     const { action } = await inquirer.prompt([{
         type: "list",
@@ -119,17 +127,17 @@ const showTaskDetails = async (idx) => {
             type: "input",
             name: "dueDate",
             message: "Enter due date (Press enter to use same date): ",
-            default: task.dueDate
+            default: task.dueDate,
+            required:true
         }
         ])
-        let parsedDate = newTask.dueDate.parse();
-        if (newTask.task === "" || newTask.dueDate.trim() === "" || !newTask.dueDate || isNaN(Date.parse(newTask.dueDate))) {
+        if (newTask.task === "" || !newTask.dueDate) {
             log.error("Info not enterd correctly, not updated");
         } else if (newTask.task === task.task) {
             log.error("task same not updated");
         } else {
             task.task = newTask.task;
-            task.dueDate = newTask.dueDate;
+            task.duelocalDate = newTask.dueDate;
             task.priority = newTask.priority;
             saveTasks(toDos);
             log.success("Updated successfully");
